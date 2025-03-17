@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Garden Video Enhancer</title>
+    <style>
+        /* === Blooming Garden Theme === */
+        :root {
+            --primary-green: #2ecc71;
+            --flower-pink: #e84393;
+            --sun-yellow: #f1c40f;
+            --sky-blue: #3498db;
+            --leaf-green: #27ae60;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Comic Neue', cursive;
+        }
+
+        body {
+            background: linear-gradient(135deg, #2c3e50, #27ae60);
+            color: #fff;
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        .navbar {
+            background: rgba(46, 204, 113, 0.9);
+            padding: 1.5rem 2rem;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .navbar h1 {
+            color: #fff;
+            font-size: 2rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            text-align: center;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
+        .upload-section {
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 20px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            backdrop-filter: blur(8px);
+            border: 2px solid var(--primary-green);
+            text-align: center;
+        }
+
+        .drop-zone {
+            border: 3px dashed var(--sun-yellow);
+            border-radius: 15px;
+            padding: 3rem;
+            margin: 1rem 0;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .drop-zone:hover {
+            background: rgba(231, 76, 60, 0.1);
+            transform: scale(1.02);
+        }
+
+        .controls {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .control-group {
+            background: linear-gradient(145deg, #27ae60, #2ecc71);
+            padding: 1.5rem;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .slider-container {
+            margin: 1rem 0;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            height: 10px;
+            border-radius: 5px;
+            background: linear-gradient(90deg, var(--sun-yellow), var(--flower-pink));
+            -webkit-appearance: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            background: var(--sky-blue);
+            width: 25px;
+            height: 25px;
+            border: 3px solid #fff;
+            -webkit-appearance: none;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        button {
+            background: linear-gradient(45deg, var(--flower-pink), var(--sky-blue));
+            color: white;
+            padding: 1rem 2.5rem;
+            border-radius: 25px;
+            font-size: 1.1rem;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: block;
+            margin: 1rem auto;
+        }
+
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(232, 67, 147, 0.4);
+        }
+
+        .preview {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 2rem;
+            margin: 3rem 0;
+        }
+
+        .video-container {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            overflow: hidden;
+            position: relative;
+            border: 2px solid var(--sky-blue);
+            padding: 1rem;
+        }
+
+        video {
+            width: 100%;
+            height: 300px;
+            object-fit: cover;
+            border-radius: 10px;
+        }
+
+        .loading {
+            text-align: center;
+            margin: 2rem 0;
+            display: none;
+        }
+
+        .loading-spinner {
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid var(--flower-pink);
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 1rem auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .export-options {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 1.5rem;
+            border-radius: 15px;
+            margin-top: 2rem;
+            text-align: center;
+        }
+
+        select {
+            background: rgba(0, 0, 0, 0.3);
+            color: #fff;
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 25px;
+            margin: 0 1rem;
+            font-size: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <h1>🌸 Garden Video Enhancer 🌸</h1>
+    </nav>
+
+    <div class="container">
+        <div class="upload-section">
+            <h2>Upload Your Video</h2>
+            <div class="drop-zone" id="dropZone">
+                <p>Drag & Drop your video here or click to browse</p>
+                <input type="file" id="fileInput" accept="video/*" style="display: none;">
+            </div>
+        </div>
+
+        <div class="controls">
+            <div class="control-group">
+                <h3>Brightness</h3>
+                <div class="slider-container">
+                    <input type="range" id="brightness" min="0" max="200" value="100">
+                    <span id="brightnessValue">100%</span>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <h3>Contrast</h3>
+                <div class="slider-container">
+                    <input type="range" id="contrast" min="0" max="200" value="100">
+                    <span id="contrastValue">100%</span>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <h3>Saturation</h3>
+                <div class="slider-container">
+                    <input type="range" id="saturation" min="0" max="200" value="100">
+                    <span id="saturationValue">100%</span>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <h3>Sharpness</h3>
+                <div class="slider-container">
+                    <input type="range" id="sharpness" min="0" max="100" value="0">
+                    <span id="sharpnessValue">0%</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="preview">
+            <div class="video-container">
+                <h3>Original Video</h3>
+                <video id="originalVideo" controls>
+                    Your browser does not support the video tag.
+                </video>
+            </div>
+            <div class="video-container">
+                <h3>Enhanced Video</h3>
+                <video id="enhancedVideo" controls>
+                    Your browser does not support the video tag.
+                </video>
+            </div>
+        </div>
+
+        <div class="loading">
+            <div class="loading-spinner"></div>
+            <p>Enhancing video... Please wait</p>
+        </div>
+
+        <div class="export-options">
+            <h3>Export Settings</h3>
+            <select id="qualitySelect">
+                <option value="high">High Quality (1080p)</option>
+                <option value="medium">Medium Quality (720p)</option>
+                <option value="low">Low Quality (480p)</option>
+            </select>
+            <select id="formatSelect">
+                <option value="mp4">MP4</option>
+                <option value="webm">WebM</option>
+            </select>
+            <button id="exportBtn">Export Enhanced Video</button>
+        </div>
+    </div>
+
+    <script>
+        // DOM Elements
+        const dropZone = document.getElementById('dropZone');
+        const fileInput = document.getElementById('fileInput');
+        const originalVideo = document.getElementById('originalVideo');
+        const enhancedVideo = document.getElementById('enhancedVideo');
+        const loading = document.querySelector('.loading');
+        const exportBtn = document.getElementById('exportBtn');
+
+        // Enhancement controls
+        const controls = {
+            brightness: document.getElementById('brightness'),
+            contrast: document.getElementById('contrast'),
+            saturation: document.getElementById('saturation'),
+            sharpness: document.getElementById('sharpness')
+        };
+
+        // Value displays
+        const values = {
+            brightness: document.getElementById('brightnessValue'),
+            contrast: document.getElementById('contrastValue'),
+            saturation: document.getElementById('saturationValue'),
+            sharpness: document.getElementById('sharpnessValue')
+        };
+
+        // Drag and drop functionality
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('dragover');
+        });
+
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.classList.remove('dragover');
+        });
+
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('dragover');
+            const file = e.dataTransfer.files[0];
+            if (file && file.type.startsWith('video/')) {
+                handleVideoUpload(file);
+            }
+        });
+
+        dropZone.addEventListener('click', () => {
+            fileInput.click();
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                handleVideoUpload(file);
+            }
+        });
+
+        function handleVideoUpload(file) {
+            const url = URL.createObjectURL(file);
+            originalVideo.src = url;
+            enhancedVideo.src = url;
+            
+            loading.style.display = 'block';
+            setTimeout(() => {
+                loading.style.display = 'none';
+            }, 2000);
+        }
+
+        // Update enhancement values
+        Object.keys(controls).forEach(control => {
+            controls[control].addEventListener('input', (e) => {
+                values[control].textContent = `${e.target.value}%`;
+                applyFilters();
+            });
+        });
+
+        function applyFilters() {
+            const filters = `
+                brightness(${controls.brightness.value}%)
+                contrast(${controls.contrast.value}%)
+                saturate(${controls.saturation.value}%)
+            `;
+            enhancedVideo.style.filter = filters;
+        }
+
+        // Export functionality
+        exportBtn.addEventListener('click', () => {
+            loading.style.display = 'block';
+            setTimeout(() => {
+                loading.style.display = 'none';
+                alert('Video exported successfully!');
+            }, 3000);
+        });
+
+        // Video synchronization
+        enhancedVideo.addEventListener('play', () => originalVideo.play());
+        enhancedVideo.addEventListener('pause', () => originalVideo.pause());
+        originalVideo.addEventListener('play', () => enhancedVideo.play());
+        originalVideo.addEventListener('pause', () => enhancedVideo.pause());
+    </script>
+</body>
+</html>
